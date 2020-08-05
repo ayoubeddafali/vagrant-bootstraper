@@ -1,6 +1,6 @@
 ip: 192.168.5.
 ip_start: 1
-nodes_number: 2 
+nodes_number: 1
 memory: 2048
 cpus: 2
 install_docker: true

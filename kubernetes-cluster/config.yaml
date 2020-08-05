@@ -1,0 +1,10 @@
+master:
+  memory: 2048
+  cpus: 2
+
+workers:
+  memory: 1024
+  cpus: 2
+
+install_docker: false
+install_kubetools: false
