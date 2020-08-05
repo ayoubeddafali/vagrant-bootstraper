@@ -1,0 +1,56 @@
+# -*- mode: ruby -*-
+# vi:set ft=ruby sw=2 ts=2 sts=2:
+
+
+require 'yaml'
+if File.file?('config.yaml')
+  conf = YAML.load_file('config.yaml')
+else
+  raise "Configuration file 'config.yaml' does not exist."
+end
+
+
+# Define the number of master and worker nodes
+NODES_NUMBER = conf["nodes_number"]
+IP = conf["ip"]
+IP_START = conf["ip_start"]
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "ubuntu/bionic64"
+
+  config.vm.box_check_update = false
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+
+  # Provision  Nodes
+  (1..NODES_NUMBER).each do |i|
+      config.vm.define "node-#{i}" do |node|
+        # Name shown in the GUI
+        node.vm.provider "virtualbox" do |vb|
+            vb.name = "lab-node-#{i}"
+            vb.memory = conf["memory"]
+            vb.cpus = conf["cpus"]
+        end
+        node.vm.hostname = "node-#{i}"
+        node.vm.network :private_network, ip: IP + "#{IP_START + i}"
+        node.vm.network "forwarded_port", guest: 22, host: "#{2710 + i}"
+
+        node.vm.provision "setup-hosts", :type => "shell", :path => "../scripts/setup-hosts.sh" do |s|
+          s.args = ["enp0s8", NODES_NUMBER, IP, IP_START]
+        end
+
+        node.vm.provision "setup-dns", type: "shell", :path => "../scripts/update-dns.sh"
+        node.vm.provision "allow-bridge-nf-traffic", :type => "shell", :path => "../scripts/allow-bridge-nf-traffic.sh"
+        if conf["install_docker"] == true
+          node.vm.provision "install-docker", type: "shell", :path => "../scripts/install-docker.sh"
+        end 
+
+      end
+  end
+
+end
