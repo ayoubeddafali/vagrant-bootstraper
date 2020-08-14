@@ -1,0 +1,11 @@
+interface: wlp2s0
+master:
+  memory: 2048
+  cpus: 2
+
+workers:
+  memory: 2048
+  cpus: 2
+
+install_docker: true
+install_kubetools: true
