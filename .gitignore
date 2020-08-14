@@ -1,2 +1,4 @@
 *.log
 */**/.vagrant/
+kubernetes-ready/join.sh
+kubernetes-ready/id_rsa.pub
